@@ -358,4 +358,30 @@ bool UDebugMenuSubsystem::IsPresetRegistered(UDebugMenuPreset* Preset) const
 #endif // WITH_DEBUG_MENU
 }
 
+bool UDebugMenuSubsystem::SetDebugMenuCategory(const FName& CategoryName)
+{
+#if WITH_DEBUG_MENU
+	if (!ImGuiDebugMenu)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("DebugMenuSubsystem::SetDebugMenuCategory - ImGuiDebugMenu is null"));
+		return false;
+	}
+
+	if (CategoryName.IsNone())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("DebugMenuSubsystem::SetDebugMenuCategory - CategoryName is None"));
+		return false;
+	}
+
+	// Set the category directly using ImGuiDebugMenu's SetCategory method
+	ImGuiDebugMenu->SetCategory(CategoryName);
+	
+	UE_LOG(LogTemp, Log, TEXT("DebugMenuSubsystem::SetDebugMenuCategory - Set active category to '%s'"), *CategoryName.ToString());
+	return true;
+#else
+	UE_LOG(LogTemp, Warning, TEXT("DebugMenuSubsystem::SetDebugMenuCategory - Debug menu disabled in this build"));
+	return false;
+#endif // WITH_DEBUG_MENU
+}
+
 UE_ENABLE_OPTIMIZATION

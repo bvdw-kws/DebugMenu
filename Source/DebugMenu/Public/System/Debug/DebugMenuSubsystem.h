@@ -123,6 +123,16 @@ public:
 	bool IsPresetRegistered(class UDebugMenuPreset* Preset) const;
 	
 	/**
+	 * Set the active debug menu category/page programmatically.
+	 * This allows you to switch to a specific debug menu tab from code or Blueprint.
+	 * 
+	 * @param CategoryName - Name of the category to switch to (must exist in debug menu)
+	 * @return True if category was found and switched to successfully
+	 */
+	UFUNCTION(BlueprintCallable, Category="Debug Menu", meta=(DisplayName="Set Debug Menu Category"))
+	bool SetDebugMenuCategory(const FName& CategoryName);
+	
+	/**
 	 * Delegate broadcast when debug menu is toggled open or closed.
 	 * Subscribe to this to react to menu state changes in your game code.
 	 */

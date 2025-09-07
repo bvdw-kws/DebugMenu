@@ -79,6 +79,22 @@ protected:
 		meta=(DisplayName="Auto Register on Begin Play"))
 	bool bAutoRegisterOnBeginPlay = true;
 
+	/**
+	 * Whether to automatically switch to the preset's category when registered.
+	 * 
+	 * When true: After successful registration, the debug menu will automatically
+	 * switch to display the category specified by this preset. This is useful
+	 * for level-specific debug functionality that should be immediately visible.
+	 * 
+	 * When false (default): The debug menu category is not changed during registration.
+	 * 
+	 * This only takes effect when the preset is successfully registered, either
+	 * automatically during BeginPlay() or manually via RegisterDebugMenu().
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Debug Menu", 
+		meta=(DisplayName="Force Open Preset Category"))
+	bool bForceOpenPresetCategory = false;
+
 	// AActor overrides
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -147,6 +163,19 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Debug Menu", 
 		meta=(DisplayName="Set Debug Menu Preset"))
 	void SetDebugMenuPreset(UDebugMenuPreset* NewPreset);
+
+	/**
+	 * Manually switch the debug menu to display this preset's category.
+	 * 
+	 * This function allows you to programmatically open the debug menu category
+	 * associated with this actor's preset. Useful for dynamic category switching
+	 * based on gameplay events or user interactions.
+	 * 
+	 * @return True if the category was successfully switched to, false if no preset or switch failed
+	 */
+	UFUNCTION(BlueprintCallable, Category="Debug Menu", 
+		meta=(DisplayName="Open Preset Category"))
+	bool OpenPresetCategory();
 
 private:
 	/**

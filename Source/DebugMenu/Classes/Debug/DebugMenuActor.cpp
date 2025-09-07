@@ -10,6 +10,7 @@
 
 #include "Debug/DebugMenuPreset.h"
 #include "Components/BillboardComponent.h"
+#include "System/Debug/DebugMenuSubsystem.h"
 
 ADebugMenuActor::ADebugMenuActor()
 {
@@ -96,6 +97,29 @@ bool ADebugMenuActor::RegisterDebugMenu()
 		
 		UE_LOG(LogTemp, Log, TEXT("DebugMenuActor '%s' successfully registered preset '%s'"), 
 			*GetName(), *DebugMenuPreset->GetName());
+
+		// If force open is enabled, switch to the preset's category
+		if (bForceOpenPresetCategory)
+		{
+			if (UDebugMenuSubsystem* DebugMenuSubsystem = GetGameInstance()->GetSubsystem<UDebugMenuSubsystem>())
+			{
+				if (DebugMenuSubsystem->SetDebugMenuCategory(DebugMenuPreset->CategoryName))
+				{
+					UE_LOG(LogTemp, Log, TEXT("DebugMenuActor '%s' forced open category '%s'"), 
+						*GetName(), *DebugMenuPreset->CategoryName.ToString());
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("DebugMenuActor '%s' failed to force open category '%s'"), 
+						*GetName(), *DebugMenuPreset->CategoryName.ToString());
+				}
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("DebugMenuActor '%s' cannot force open category - DebugMenuSubsystem not found"), 
+					*GetName());
+			}
+		}
 	}
 	else
 	{
@@ -186,4 +210,46 @@ void ADebugMenuActor::SetDebugMenuPreset(UDebugMenuPreset* NewPreset)
 
 	UE_LOG(LogTemp, Log, TEXT("DebugMenuActor '%s' preset changed to '%s'"), 
 		*GetName(), NewPreset ? *NewPreset->GetName() : TEXT("None"));
+}
+
+bool ADebugMenuActor::OpenPresetCategory()
+{
+#if WITH_DEBUG_MENU
+	// Validate that we have a preset to get the category from
+	if (!DebugMenuPreset)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("DebugMenuActor '%s' cannot open category - no preset assigned"), 
+			*GetName());
+		return false;
+	}
+
+	// Get the debug menu subsystem
+	UDebugMenuSubsystem* DebugMenuSubsystem = GetGameInstance()->GetSubsystem<UDebugMenuSubsystem>();
+	if (!DebugMenuSubsystem)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("DebugMenuActor '%s' cannot open category - DebugMenuSubsystem not found"), 
+			*GetName());
+		return false;
+	}
+
+	// Switch to the preset's category
+	bool bSuccess = DebugMenuSubsystem->SetDebugMenuCategory(DebugMenuPreset->CategoryName);
+	
+	if (bSuccess)
+	{
+		UE_LOG(LogTemp, Log, TEXT("DebugMenuActor '%s' opened category '%s'"), 
+			*GetName(), *DebugMenuPreset->CategoryName.ToString());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("DebugMenuActor '%s' failed to open category '%s'"), 
+			*GetName(), *DebugMenuPreset->CategoryName.ToString());
+	}
+
+	return bSuccess;
+#else
+	UE_LOG(LogTemp, Warning, TEXT("DebugMenuActor '%s' cannot open category - debug menu disabled in this build"), 
+		*GetName());
+	return false;
+#endif // WITH_DEBUG_MENU
 }
