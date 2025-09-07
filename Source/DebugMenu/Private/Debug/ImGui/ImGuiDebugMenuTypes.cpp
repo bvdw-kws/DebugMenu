@@ -57,6 +57,10 @@ void FImGuiDebugMenuFloat::Draw_Internal(const FImGuiDebugMenuItemDrawParams& In
 	if (ImGui::DragFloat(StringCast<ANSICHAR>(*Label).Get(), &Value, 0.05f, MinValue, MaxValue))
 	{
 		ApplyValue();
+		if (GetAutoApply())
+		{
+			bExec = true;
+		}
 	}
 #endif // WITH_IMGUI
 }
@@ -116,6 +120,10 @@ void FImGuiDebugMenuInt::Draw_Internal(const FImGuiDebugMenuItemDrawParams& InDr
 	if (ImGui::DragInt(StringCast<ANSICHAR>(*Label).Get(), &Value, 1.0f, MinValue, MaxValue))
 	{
 		ApplyValue();
+		if (GetAutoApply())
+		{
+			bExec = true;
+		}
 	}
 #endif // WITH_IMGUI
 }

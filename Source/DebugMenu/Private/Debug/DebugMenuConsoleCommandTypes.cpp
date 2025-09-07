@@ -32,11 +32,13 @@ UDebugMenuConsoleCommandInt::UDebugMenuConsoleCommandInt()
 	DefaultValue = 1;
 	MinValue = 0;
 	MaxValue = 10;
+	bExecOnLoad = false;
+	bAutoApply = false;
 }
 
 void UDebugMenuConsoleCommandInt::RegisterConsoleCommand(const FName& Category, UImGuiDebugMenu& DebugMenu)
 {
-	DebugMenu.AddItem_Int(Category, CommandName, DefaultValue, MinValue, MaxValue, ConsoleCommand);
+	DebugMenu.AddItem_Int(Category, CommandName, DefaultValue, MinValue, MaxValue, ConsoleCommand, bExecOnLoad, bAutoApply);
 }
 
 UDebugMenuConsoleCommandFloat::UDebugMenuConsoleCommandFloat()
@@ -45,11 +47,13 @@ UDebugMenuConsoleCommandFloat::UDebugMenuConsoleCommandFloat()
 	DefaultValue = 0.0f;
 	MinValue = 0.0f;
 	MaxValue = 1.0f;
+	bExecOnLoad = false;
+	bAutoApply = false;
 }
 
 void UDebugMenuConsoleCommandFloat::RegisterConsoleCommand(const FName& Category, UImGuiDebugMenu& DebugMenu)
 {
-	DebugMenu.AddItem_Float(Category, CommandName, DefaultValue, MinValue, MaxValue, ConsoleCommand);
+	DebugMenu.AddItem_Float(Category, CommandName, DefaultValue, MinValue, MaxValue, ConsoleCommand, bExecOnLoad, bAutoApply);
 }
 
 UDebugMenuConsoleCommandList::UDebugMenuConsoleCommandList()

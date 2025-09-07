@@ -432,7 +432,8 @@ TWeakPtr<IDebugMenuItemHandle> UImGuiDebugMenu::AddItem_Float(
 	float MinValue,
 	float MaxValue,
 	FString ConsoleCommand,
-	bool bExecOnLoad /*= false*/)
+	bool bExecOnLoad /*= false*/,
+	bool bAutoApply /*= false*/)
 {
 	TWeakPtr<FImGuiDebugMenuFloat> NewItem = AddItem_Template<FImGuiDebugMenuFloat>(Category, Label, ConsoleCommand, bExecOnLoad);
 
@@ -440,6 +441,7 @@ TWeakPtr<IDebugMenuItemHandle> UImGuiDebugMenu::AddItem_Float(
 	{
 		NewItem.Pin()->SetValue(DefaultValue);
 		NewItem.Pin()->SetValueRange(MinValue, MaxValue);
+		NewItem.Pin()->SetAutoApply(bAutoApply);
 	}
 
 	return NewItem;
@@ -452,7 +454,8 @@ TWeakPtr<IDebugMenuItemHandle> UImGuiDebugMenu::AddItem_Int(
 	int32 MinValue,
 	int32 MaxValue,
 	FString ConsoleCommand,
-	bool bExecOnLoad /*= false*/)
+	bool bExecOnLoad /*= false*/,
+	bool bAutoApply /*= false*/)
 {
 	TWeakPtr<FImGuiDebugMenuInt> NewItem = AddItem_Template<FImGuiDebugMenuInt>(Category, Label, ConsoleCommand, bExecOnLoad);
 
@@ -460,6 +463,7 @@ TWeakPtr<IDebugMenuItemHandle> UImGuiDebugMenu::AddItem_Int(
 	{
 		NewItem.Pin()->SetValue(DefaultValue);
 		NewItem.Pin()->SetValueRange(MinValue, MaxValue);
+		NewItem.Pin()->SetAutoApply(bAutoApply);
 	}
 
 	return NewItem;

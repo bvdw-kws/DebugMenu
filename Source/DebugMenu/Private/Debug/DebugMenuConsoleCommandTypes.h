@@ -111,6 +111,14 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, Category=ConsoleCommand)
 	int32 MaxValue;
+	
+	/** If true, executes command when loading saved settings */
+	UPROPERTY(EditDefaultsOnly, Category=ConsoleCommand, meta=(DisplayName="Execute On Load"))
+	bool bExecOnLoad;
+	
+	/** If true, automatically executes console command when value changes (like boolean controls) */
+	UPROPERTY(EditDefaultsOnly, Category=ConsoleCommand, meta=(DisplayName="Auto Apply"))
+	bool bAutoApply;
 };
 
 UCLASS(DisplayName = "Floating Number")
@@ -132,6 +140,14 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, Category=ConsoleCommand)
 	float MaxValue;
+	
+	/** If true, executes command when loading saved settings */
+	UPROPERTY(EditDefaultsOnly, Category=ConsoleCommand, meta=(DisplayName="Execute On Load"))
+	bool bExecOnLoad;
+	
+	/** If true, automatically executes console command when value changes (like boolean controls) */
+	UPROPERTY(EditDefaultsOnly, Category=ConsoleCommand, meta=(DisplayName="Auto Apply"))
+	bool bAutoApply;
 };
 
 UCLASS(DisplayName = "List")

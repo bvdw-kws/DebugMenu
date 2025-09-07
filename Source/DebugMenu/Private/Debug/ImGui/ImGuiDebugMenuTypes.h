@@ -106,6 +106,16 @@ public:
 		bExecOnLoad = bInExecOnLoad;
 	}
 
+	void SetAutoApply(bool bInAutoApply)
+	{
+		bAutoApply = bInAutoApply;
+	}
+
+	bool GetAutoApply() const
+	{
+		return bAutoApply;
+	}
+
 	virtual void Draw(APlayerController* PlayerController, const FImGuiDebugMenuItemDrawParams& InDrawParams) override final
 	{
 #if WITH_IMGUI
@@ -189,6 +199,7 @@ protected:
 
 private:
 	bool bExecOnLoad = true;
+	bool bAutoApply = false;
 
 };
 

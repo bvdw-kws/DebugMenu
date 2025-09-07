@@ -43,8 +43,8 @@ public:
 	TWeakPtr<IDebugMenuItemHandle> AddItem_SimpleExec(const FName& Category, FString Label, FString ConsoleCommand) override final;
 	TWeakPtr<IDebugMenuItemHandle> AddItem_InputText(const FName& Category, FString Label, FString ConsoleCommand) override final;
 	TWeakPtr<IDebugMenuItemHandle> AddItem_Bool(const FName& Category, FString Label, bool bDefaultValue, FString ConsoleCommand, bool bExecOnLoad = false) override final;
-	TWeakPtr<IDebugMenuItemHandle> AddItem_Float(const FName& Category, FString Label, float DefaultValue, float MinValue, float MaxValue, FString ConsoleCommand, bool bExecOnLoad = false) override final;
-	TWeakPtr<IDebugMenuItemHandle> AddItem_Int(const FName& Category, FString Label, int32 DefaultValue, int32 MinValue, int32 MaxValue, FString ConsoleCommand, bool bExecOnLoad = false) override final;
+	TWeakPtr<IDebugMenuItemHandle> AddItem_Float(const FName& Category, FString Label, float DefaultValue, float MinValue, float MaxValue, FString ConsoleCommand, bool bExecOnLoad = false, bool bAutoApply = false) override final;
+	TWeakPtr<IDebugMenuItemHandle> AddItem_Int(const FName& Category, FString Label, int32 DefaultValue, int32 MinValue, int32 MaxValue, FString ConsoleCommand, bool bExecOnLoad = false, bool bAutoApply = false) override final;
 	TWeakPtr<IDebugMenuListHandle> AddItem_List(const FName& Category, FString Label, const TArray<FString>& ListItems, FString ConsoleCommand, bool bExecOnLoad = false) override final;
 
 protected:

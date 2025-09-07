@@ -143,9 +143,10 @@ public:
 	 * @param MaxValue - Maximum allowed value (right side of slider)  
 	 * @param ConsoleCommand - Console command that receives the float value
 	 * @param bExecOnLoad - If true, executes command when loading saved settings
+	 * @param bAutoApply - If true, automatically executes console command when value changes (like boolean controls)
 	 * @return Handle for programmatic control, or invalid if creation failed
 	 */
-	virtual TWeakPtr<IDebugMenuItemHandle> AddItem_Float(const FName& Category, FString Label, float DefaultValue, float MinValue, float MaxValue, FString ConsoleCommand, bool bExecOnLoad = false) = 0;
+	virtual TWeakPtr<IDebugMenuItemHandle> AddItem_Float(const FName& Category, FString Label, float DefaultValue, float MinValue, float MaxValue, FString ConsoleCommand, bool bExecOnLoad = false, bool bAutoApply = false) = 0;
 	
 	/**
 	 * Add an integer spinner with minimum and maximum bounds.
@@ -157,10 +158,11 @@ public:
 	 * @param MinValue - Minimum allowed value
 	 * @param MaxValue - Maximum allowed value
 	 * @param ConsoleCommand - Console command that receives the integer value
-	 * @param bExecOnLoad - If true, executes command when loading saved settings  
+	 * @param bExecOnLoad - If true, executes command when loading saved settings
+	 * @param bAutoApply - If true, automatically executes console command when value changes (like boolean controls)
 	 * @return Handle for programmatic control, or invalid if creation failed
 	 */
-	virtual TWeakPtr<IDebugMenuItemHandle> AddItem_Int(const FName& Category, FString Label, int32 DefaultValue, int32 MinValue, int32 MaxValue, FString ConsoleCommand, bool bExecOnLoad = false) = 0;
+	virtual TWeakPtr<IDebugMenuItemHandle> AddItem_Int(const FName& Category, FString Label, int32 DefaultValue, int32 MinValue, int32 MaxValue, FString ConsoleCommand, bool bExecOnLoad = false, bool bAutoApply = false) = 0;
 	
 	/**
 	 * Add a dropdown list with predefined string options.
