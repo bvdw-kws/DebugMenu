@@ -7,9 +7,8 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "Debug/DebugMenuInterface.h"
+#include "Debug/DebugMenuConsoleCommandTypes.h"
 
 #include "DebugMenuPreset.generated.h"
 
@@ -54,18 +53,15 @@ public:
 
 public:
 	/**
-	 * Category name for this preset - determines which tab these commands appear under.
-	 * If multiple presets use the same category, their commands will be grouped together.
-	 * Use descriptive names like "Player", "Graphics", "Physics", etc.
-	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Debug Menu", meta=(DisplayName="Category Name"))
-	FName CategoryName = TEXT("Sample");
-
-	/**
-	 * List of debug menu commands to register when this preset is activated.
+	 * Debug menu commands organized by categories.
+	 * 
+	 * This map defines all debug menu items for this preset. Each category becomes 
+	 * a tab in the debug menu, and the console command definitions determine what 
+	 * controls appear within that tab.
+	 * 
 	 * Each command defines a control type (button, boolean, slider, etc.) and the
 	 * console command it should execute. Commands appear in the debug menu in the
-	 * order they're listed here.
+	 * order they're listed within each category.
 	 * 
 	 * Use the dropdown to add different control types:
 	 * - Simple Exec: Buttons that execute console commands without parameters
@@ -73,11 +69,15 @@ public:
 	 * - Float: Sliders with min/max bounds
 	 * - Integer: Number spinners with bounds
 	 * - List: Dropdown menus with predefined options
+	 * 
+	 * Useful for:
+	 * - Setting up collections of related debug commands
+	 * - Creating reusable debug configurations
+	 * - Organizing debug functionality by game system
 	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Debug Menu", 
-		meta=(DisplayName="Debug Commands", TitleProperty="CommandName"))
-	TArray<TObjectPtr<UDebugMenuConsoleCommandBase>> DebugCommands;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Debug Menu", meta=(DisplayName="Category Commands"))
+	TMap<FName, FDebugMenuCategoryDefinition> CategoryToCommandsMap;
+	
 public:
 	/**
 	 * Register all debug commands from this preset with the debug menu system.

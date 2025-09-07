@@ -179,7 +179,7 @@ public:
 /*
 * Define each category for our debug menu.
 */
-USTRUCT()
+USTRUCT(BlueprintType)
 struct DEBUGMENU_API FDebugMenuCategoryDefinition
 {
 	GENERATED_BODY()

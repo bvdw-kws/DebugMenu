@@ -98,20 +98,30 @@ bool ADebugMenuActor::RegisterDebugMenu()
 		UE_LOG(LogTemp, Log, TEXT("DebugMenuActor '%s' successfully registered preset '%s'"), 
 			*GetName(), *DebugMenuPreset->GetName());
 
-		// If force open is enabled, switch to the preset's category
+		// If force open is enabled, switch to the first available category from this preset
 		if (bForceOpenPresetCategory)
 		{
 			if (UDebugMenuSubsystem* DebugMenuSubsystem = GetGameInstance()->GetSubsystem<UDebugMenuSubsystem>())
 			{
-				if (DebugMenuSubsystem->SetDebugMenuCategory(DebugMenuPreset->CategoryName))
+				// Get the first category from the preset's CategoryToCommandsMap
+				if (DebugMenuPreset->CategoryToCommandsMap.Num() > 0)
 				{
-					UE_LOG(LogTemp, Log, TEXT("DebugMenuActor '%s' forced open category '%s'"), 
-						*GetName(), *DebugMenuPreset->CategoryName.ToString());
+					FName FirstCategory = DebugMenuPreset->CategoryToCommandsMap.begin()->Key;
+					if (DebugMenuSubsystem->SetDebugMenuCategory(FirstCategory))
+					{
+						UE_LOG(LogTemp, Log, TEXT("DebugMenuActor '%s' forced open first category '%s'"), 
+							*GetName(), *FirstCategory.ToString());
+					}
+					else
+					{
+						UE_LOG(LogTemp, Warning, TEXT("DebugMenuActor '%s' failed to force open category '%s'"), 
+							*GetName(), *FirstCategory.ToString());
+					}
 				}
 				else
 				{
-					UE_LOG(LogTemp, Warning, TEXT("DebugMenuActor '%s' failed to force open category '%s'"), 
-						*GetName(), *DebugMenuPreset->CategoryName.ToString());
+					UE_LOG(LogTemp, Warning, TEXT("DebugMenuActor '%s' cannot force open category - preset has no categories defined"), 
+						*GetName());
 				}
 			}
 			else
@@ -130,11 +140,8 @@ bool ADebugMenuActor::RegisterDebugMenu()
 	return bRegistrationSuccess;
 #else
 	// Debug menu system disabled in this build
-	if (bVerboseLogging)
-	{
-		UE_LOG(LogTemp, Log, TEXT("DebugMenuActor '%s' registration skipped - debug menu disabled"), 
-			*GetName());
-	}
+	UE_LOG(LogTemp, Log, TEXT("DebugMenuActor '%s' registration skipped - debug menu disabled"), 
+		*GetName());
 	return false;
 #endif // WITH_DEBUG_MENU
 }
@@ -223,6 +230,14 @@ bool ADebugMenuActor::OpenPresetCategory()
 		return false;
 	}
 
+	// Check if preset has any categories defined
+	if (DebugMenuPreset->CategoryToCommandsMap.Num() == 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("DebugMenuActor '%s' cannot open category - preset has no categories defined"), 
+			*GetName());
+		return false;
+	}
+
 	// Get the debug menu subsystem
 	UDebugMenuSubsystem* DebugMenuSubsystem = GetGameInstance()->GetSubsystem<UDebugMenuSubsystem>();
 	if (!DebugMenuSubsystem)
@@ -232,18 +247,19 @@ bool ADebugMenuActor::OpenPresetCategory()
 		return false;
 	}
 
-	// Switch to the preset's category
-	bool bSuccess = DebugMenuSubsystem->SetDebugMenuCategory(DebugMenuPreset->CategoryName);
+	// Switch to the first category from the preset
+	FName FirstCategory = DebugMenuPreset->CategoryToCommandsMap.begin()->Key;
+	bool bSuccess = DebugMenuSubsystem->SetDebugMenuCategory(FirstCategory);
 	
 	if (bSuccess)
 	{
-		UE_LOG(LogTemp, Log, TEXT("DebugMenuActor '%s' opened category '%s'"), 
-			*GetName(), *DebugMenuPreset->CategoryName.ToString());
+		UE_LOG(LogTemp, Log, TEXT("DebugMenuActor '%s' opened first category '%s'"), 
+			*GetName(), *FirstCategory.ToString());
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("DebugMenuActor '%s' failed to open category '%s'"), 
-			*GetName(), *DebugMenuPreset->CategoryName.ToString());
+			*GetName(), *FirstCategory.ToString());
 	}
 
 	return bSuccess;

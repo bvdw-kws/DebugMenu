@@ -41,19 +41,25 @@ void UDebugMenuSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 		// Set the initial category tab based on settings
 		ImGuiDebugMenu->SetCategory(DebugMenuSettings->DefaultCategory);
 
-		// Register all predefined console commands from settings
-		for (const auto& CategoryToCommandDefs : DebugMenuSettings->CategoryToCommandsMap)
+		// Load and register the default debug preset if specified in settings
+		if (!DebugMenuSettings->DefaultDebugPreset.IsNull())
 		{
-			for (const auto& ConsoleCommandDef : CategoryToCommandDefs.Value.ConsoleCommands)
+			UDebugMenuPreset* DefaultPreset = DebugMenuSettings->DefaultDebugPreset.LoadSynchronous();
+			if (DefaultPreset)
 			{
-				if (ConsoleCommandDef == nullptr)
-				{
-					continue;
-				}
-
-				// Each console command definition knows how to register itself with the debug menu
-				ConsoleCommandDef->RegisterConsoleCommand(CategoryToCommandDefs.Key, *ImGuiDebugMenu);
+				// Register the default preset automatically at startup
+				RegisterPreset(DefaultPreset);
+				UE_LOG(LogTemp, Log, TEXT("DebugMenuSubsystem::Initialize - Auto-registered default preset '%s'"), 
+					*DefaultPreset->GetName());
 			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("DebugMenuSubsystem::Initialize - Failed to load default preset from settings"));
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Log, TEXT("DebugMenuSubsystem::Initialize - No default preset specified in settings"));
 		}
 	}
 #endif // WITH_DEBUG_MENU
@@ -270,32 +276,47 @@ bool UDebugMenuSubsystem::RegisterPreset(UDebugMenuPreset* Preset)
 	// Get the debug menu interface
 	IDebugMenu& DebugMenu = *ImGuiDebugMenu;
 	
-	// Register each debug command from the preset
+	// Register debug commands from each category in the preset
 	TArray<TWeakPtr<IDebugMenuItemHandle>> PresetHandles;
-	PresetHandles.Reserve(Preset->DebugCommands.Num());
+	int32 TotalCommandCount = 0;
 	
-	for (UDebugMenuConsoleCommandBase* Command : Preset->DebugCommands)
+	// Count total commands across all categories for reservation
+	for (const auto& CategoryPair : Preset->CategoryToCommandsMap)
 	{
-		if (!Command)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("DebugMenuSubsystem::RegisterPreset - Preset '%s' contains null command - skipping"), *Preset->GetName());
-			continue;
-		}
-
-		// Let each command register itself with the debug menu
-		Command->RegisterConsoleCommand(Preset->CategoryName, *ImGuiDebugMenu);
+		TotalCommandCount += CategoryPair.Value.ConsoleCommands.Num();
+	}
+	PresetHandles.Reserve(TotalCommandCount);
+	
+	// Register commands for each category
+	for (const auto& CategoryPair : Preset->CategoryToCommandsMap)
+	{
+		const FName& CategoryName = CategoryPair.Key;
+		const FDebugMenuCategoryDefinition& CategoryDef = CategoryPair.Value;
 		
-		// Note: Current command system doesn't return handles, but we're tracking the preset
-		// In a future version with proper handle return, we would store them here:
-		// TWeakPtr<IDebugMenuItemHandle> Handle = Command->RegisterWithHandle(...);
-		// PresetHandles.Add(Handle);
+		for (UDebugMenuConsoleCommandBase* Command : CategoryDef.ConsoleCommands)
+		{
+			if (!Command)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("DebugMenuSubsystem::RegisterPreset - Preset '%s' category '%s' contains null command - skipping"), 
+					*Preset->GetName(), *CategoryName.ToString());
+				continue;
+			}
+
+			// Let each command register itself with the debug menu
+			Command->RegisterConsoleCommand(CategoryName, *ImGuiDebugMenu);
+			
+			// Note: Current command system doesn't return handles, but we're tracking the preset
+			// In a future version with proper handle return, we would store them here:
+			// TWeakPtr<IDebugMenuItemHandle> Handle = Command->RegisterWithHandle(...);
+			// PresetHandles.Add(Handle);
+		}
 	}
 
 	// Track the preset as registered (even without handles for now)
 	RegisteredPresets.Add(Preset, MoveTemp(PresetHandles));
 	
-	UE_LOG(LogTemp, Log, TEXT("DebugMenuSubsystem::RegisterPreset - Registered preset '%s' with %d commands in category '%s'"), 
-		*Preset->GetName(), Preset->DebugCommands.Num(), *Preset->CategoryName.ToString());
+	UE_LOG(LogTemp, Log, TEXT("DebugMenuSubsystem::RegisterPreset - Registered preset '%s' with %d commands across %d categories"), 
+		*Preset->GetName(), TotalCommandCount, Preset->CategoryToCommandsMap.Num());
 	
 	return true;
 #else
@@ -335,8 +356,8 @@ bool UDebugMenuSubsystem::UnregisterPreset(UDebugMenuPreset* Preset)
 	// Remove from tracking
 	RegisteredPresets.Remove(Preset);
 	
-	UE_LOG(LogTemp, Log, TEXT("DebugMenuSubsystem::UnregisterPreset - Unregistered preset '%s' from category '%s'"), 
-		*Preset->GetName(), *Preset->CategoryName.ToString());
+	UE_LOG(LogTemp, Log, TEXT("DebugMenuSubsystem::UnregisterPreset - Unregistered preset '%s'"), 
+		*Preset->GetName());
 	
 	return true;
 #else

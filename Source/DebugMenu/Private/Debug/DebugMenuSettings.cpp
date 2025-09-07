@@ -6,7 +6,7 @@
 // See LICENSE file for complete terms.
 
 
-#include "DebugMenuSettings.h"
+#include "Debug/DebugMenuSettings.h"
 
 UDebugMenuSettings::UDebugMenuSettings(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)

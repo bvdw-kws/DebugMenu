@@ -16,8 +16,7 @@
 
 UDebugMenuPreset::UDebugMenuPreset()
 {
-	// Set default category name for new presets
-	CategoryName = TEXT("Sample");
+	// Default constructor - categories are defined in CategoryToCommandsMap
 }
 
 bool UDebugMenuPreset::RegisterPreset(const UObject* WorldContext)

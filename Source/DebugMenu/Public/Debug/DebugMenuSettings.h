@@ -8,9 +8,11 @@
 #pragma once
 
 #include "Engine/DeveloperSettingsBackedByCVars.h"
-#include "DebugMenuConsoleCommandTypes.h"
+#include "Debug/DebugMenuConsoleCommandTypes.h"
 
 #include "DebugMenuSettings.generated.h"
+
+class UDebugMenuPreset;
 
 /**
  * Debug Menu Settings - Configuration class for runtime debug menu behavior.
@@ -36,7 +38,7 @@
  * @endcode
  */
 UCLASS(config=Game, defaultconfig, meta=(DisplayName="Debug Menu"))
-class UDebugMenuSettings : public UDeveloperSettingsBackedByCVars
+class DEBUGMENU_API UDebugMenuSettings : public UDeveloperSettingsBackedByCVars
 {
 	GENERATED_BODY()
 
@@ -49,24 +51,25 @@ public:
 	 * If NAME_None or empty, the menu will select the first available category.
 	 * This setting helps maintain consistent debug workflow across team members.
 	 */
-	UPROPERTY(EditDefaultsOnly, Category=DebugMenu, meta=(DisplayName="Default Category"))
+	UPROPERTY(config, EditDefaultsOnly, Category=DebugMenu, meta=(DisplayName="Default Category"))
 	FName DefaultCategory = NAME_None;
 
 	/**
-	 * Predefined console command definitions organized by debug menu categories.
+	 * Default debug menu preset to load at startup.
 	 * 
-	 * This map allows you to configure debug menu items through Project Settings
-	 * rather than requiring code changes. Each category becomes a tab in the debug
-	 * menu, and the console command definitions determine what controls appear.
+	 * This preset defines all debug menu categories and commands that should be
+	 * available by default. The preset can be easily swapped to change the entire
+	 * debug menu configuration without modifying project settings.
 	 * 
-	 * Useful for:
-	 * - Setting up common debug commands across the team
-	 * - Configuring project-specific debug utilities
-	 * - Creating standardized debug interfaces for different game systems
+	 * Benefits of using a preset asset:
+	 * - Easy to share debug configurations between team members
+	 * - Version control friendly (stored as separate asset file)
+	 * - Can be swapped at runtime for different debugging scenarios
+	 * - Reusable across multiple projects
 	 * 
-	 * Note: Commands defined here are loaded at startup. Runtime-added commands
-	 * (via C++ API) will appear alongside these predefined ones.
+	 * Leave empty to start with no predefined debug commands (runtime-added commands
+	 * via C++ API will still appear).
 	 */
-	UPROPERTY(EditDefaultsOnly, Category=DebugMenu, meta=(DisplayName="Category Commands"))
-	TMap<FName, FDebugMenuCategoryDefinition> CategoryToCommandsMap;
+	UPROPERTY(config, EditDefaultsOnly, Category=DebugMenu, meta=(DisplayName="Default Debug Preset"))
+	TSoftObjectPtr<class UDebugMenuPreset> DefaultDebugPreset;
 };

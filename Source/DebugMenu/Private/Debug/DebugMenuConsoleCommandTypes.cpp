@@ -6,7 +6,7 @@
 // See LICENSE file for complete terms.
 
 
-#include "DebugMenuConsoleCommandTypes.h"
+#include "Debug/DebugMenuConsoleCommandTypes.h"
 
 #include "Debug/ImGui/ImGuiDebugMenu.h"
 
