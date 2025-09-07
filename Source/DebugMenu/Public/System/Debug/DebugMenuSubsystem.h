@@ -94,6 +94,35 @@ public:
 	IDebugMenu& GetMutableDebugMenu();
 	
 	/**
+	 * Register all debug commands from a preset with the debug menu system.
+	 * The subsystem will track the registered handles for proper cleanup.
+	 * 
+	 * @param Preset - Debug menu preset containing commands to register
+	 * @return True if registration succeeded, false if preset is null or registration failed
+	 */
+	UFUNCTION(BlueprintCallable, Category="Debug Menu", meta=(DisplayName="Register Preset"))
+	bool RegisterPreset(class UDebugMenuPreset* Preset);
+	
+	/**
+	 * Unregister all debug commands from a previously registered preset.
+	 * Removes all commands that were registered with RegisterPreset().
+	 * 
+	 * @param Preset - Debug menu preset containing commands to unregister  
+	 * @return True if unregistration succeeded, false if preset was not registered
+	 */
+	UFUNCTION(BlueprintCallable, Category="Debug Menu", meta=(DisplayName="Unregister Preset"))
+	bool UnregisterPreset(class UDebugMenuPreset* Preset);
+	
+	/**
+	 * Check if a preset is currently registered with the debug menu system.
+	 * 
+	 * @param Preset - Preset to check registration status for
+	 * @return True if preset is registered and commands are visible in debug menu
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Debug Menu", meta=(DisplayName="Is Preset Registered"))
+	bool IsPresetRegistered(class UDebugMenuPreset* Preset) const;
+	
+	/**
 	 * Delegate broadcast when debug menu is toggled open or closed.
 	 * Subscribe to this to react to menu state changes in your game code.
 	 */
@@ -146,5 +175,11 @@ private:
 	 * @return True if page was changed
 	 */
 	bool CheckChangePage(APlayerController* PlayerController);
+
+	/**
+	 * Map of registered presets to their debug menu item handles.
+	 * This allows the subsystem to properly clean up preset registrations.
+	 */
+	TMap<TWeakObjectPtr<class UDebugMenuPreset>, TArray<TWeakPtr<class IDebugMenuItemHandle>>> RegisteredPresets;
 
 };

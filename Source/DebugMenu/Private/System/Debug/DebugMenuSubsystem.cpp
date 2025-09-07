@@ -11,6 +11,7 @@
 #include "Debug/ImGui/ImGuiDebugMenu.h"
 #include "Debug/DebugMenuConsoleCommandTypes.h"
 #include "Debug/DebugMenuSettings.h"
+#include "Debug/DebugMenuPreset.h"
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
@@ -242,6 +243,119 @@ bool UDebugMenuSubsystem::CheckToggleDebugMenu(APlayerController* PlayerControll
 	}
 
 	return false;
+}
+
+bool UDebugMenuSubsystem::RegisterPreset(UDebugMenuPreset* Preset)
+{
+#if WITH_DEBUG_MENU
+	if (!Preset)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("DebugMenuSubsystem::RegisterPreset - Preset is null"));
+		return false;
+	}
+
+	// Check if already registered
+	if (RegisteredPresets.Contains(Preset))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("DebugMenuSubsystem::RegisterPreset - Preset '%s' is already registered"), *Preset->GetName());
+		return true;
+	}
+
+	if (!ImGuiDebugMenu)
+	{
+		UE_LOG(LogTemp, Error, TEXT("DebugMenuSubsystem::RegisterPreset - ImGuiDebugMenu is null"));
+		return false;
+	}
+
+	// Get the debug menu interface
+	IDebugMenu& DebugMenu = *ImGuiDebugMenu;
+	
+	// Register each debug command from the preset
+	TArray<TWeakPtr<IDebugMenuItemHandle>> PresetHandles;
+	PresetHandles.Reserve(Preset->DebugCommands.Num());
+	
+	for (UDebugMenuConsoleCommandBase* Command : Preset->DebugCommands)
+	{
+		if (!Command)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("DebugMenuSubsystem::RegisterPreset - Preset '%s' contains null command - skipping"), *Preset->GetName());
+			continue;
+		}
+
+		// Let each command register itself with the debug menu
+		Command->RegisterConsoleCommand(Preset->CategoryName, *ImGuiDebugMenu);
+		
+		// Note: Current command system doesn't return handles, but we're tracking the preset
+		// In a future version with proper handle return, we would store them here:
+		// TWeakPtr<IDebugMenuItemHandle> Handle = Command->RegisterWithHandle(...);
+		// PresetHandles.Add(Handle);
+	}
+
+	// Track the preset as registered (even without handles for now)
+	RegisteredPresets.Add(Preset, MoveTemp(PresetHandles));
+	
+	UE_LOG(LogTemp, Log, TEXT("DebugMenuSubsystem::RegisterPreset - Registered preset '%s' with %d commands in category '%s'"), 
+		*Preset->GetName(), Preset->DebugCommands.Num(), *Preset->CategoryName.ToString());
+	
+	return true;
+#else
+	UE_LOG(LogTemp, Warning, TEXT("DebugMenuSubsystem::RegisterPreset - Debug menu disabled in this build"));
+	return false;
+#endif // WITH_DEBUG_MENU
+}
+
+bool UDebugMenuSubsystem::UnregisterPreset(UDebugMenuPreset* Preset)
+{
+#if WITH_DEBUG_MENU
+	if (!Preset)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("DebugMenuSubsystem::UnregisterPreset - Preset is null"));
+		return false;
+	}
+
+	// Check if the preset is registered
+	if (!RegisteredPresets.Contains(Preset))
+	{
+		UE_LOG(LogTemp, Log, TEXT("DebugMenuSubsystem::UnregisterPreset - Preset '%s' is not registered"), *Preset->GetName());
+		return false;
+	}
+
+	// Get the handles for this preset
+	TArray<TWeakPtr<IDebugMenuItemHandle>>& PresetHandles = RegisteredPresets[Preset];
+	
+	// In a future version with proper handle support, we would cleanup each handle:
+	// for (TWeakPtr<IDebugMenuItemHandle>& Handle : PresetHandles)
+	// {
+	//     if (Handle.IsValid())
+	//     {
+	//         // Call handle cleanup/unregister method
+	//     }
+	// }
+	
+	// Remove from tracking
+	RegisteredPresets.Remove(Preset);
+	
+	UE_LOG(LogTemp, Log, TEXT("DebugMenuSubsystem::UnregisterPreset - Unregistered preset '%s' from category '%s'"), 
+		*Preset->GetName(), *Preset->CategoryName.ToString());
+	
+	return true;
+#else
+	return false;
+#endif // WITH_DEBUG_MENU
+}
+
+bool UDebugMenuSubsystem::IsPresetRegistered(UDebugMenuPreset* Preset) const
+{
+#if WITH_DEBUG_MENU
+	if (!Preset)
+	{
+		return false;
+	}
+	
+	return RegisteredPresets.Contains(Preset);
+#else
+	return false;
+#endif // WITH_DEBUG_MENU
 }
 
 UE_ENABLE_OPTIMIZATION
