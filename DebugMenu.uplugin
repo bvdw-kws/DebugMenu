@@ -1,10 +1,10 @@
 {
 	"FileVersion": 3,
 	"Version": 1,
-	"VersionName": "1.0",
+	"VersionName": "1.0.0",
 	"FriendlyName": "Debug Menu",
-	"Description": "",
-	"Category": "Tools",
+	"Description": "Professional runtime debug menus for Unreal Engine projects. Create categorized debug interfaces with real-time parameter tweaking using ImGui. Features bool toggles, float sliders, integer controls, text input, dropdown lists, and console command integration. Perfect for developers, QA teams, and rapid iteration. Automatically excluded from shipping builds. Supports gamepad navigation and save/load configurations.",
+	"Category": "Developer Tools",
 	"CreatedBy": "Bastien Van de Walle",
 	"CreatedByURL": "",
 	"DocsURL": "",
@@ -13,18 +13,18 @@
 	"CanContainContent": true,
 	"IsBetaVersion": false,
 	"Installed": false,
-	"EnabledByDefault" : true,
+	"EnabledByDefault": true,
 	"Modules": [
 		{
 			"Name": "DebugMenu",
 			"Type": "Runtime",
 			"LoadingPhase": "PreLoadingScreen"
-		}
-	],
-	"Plugins": [
+		},
 		{
 			"Name": "ImGui",
-			"Enabled": true
+			"Type": "DeveloperTool",
+			"LoadingPhase": "PreDefault"
 		}
-	]
+	],
+	"Plugins": []
 }
