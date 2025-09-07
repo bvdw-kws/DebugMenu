@@ -13,22 +13,58 @@
 
 class UImGuiDebugMenu;
 
-/*
-* Base class to define a console command for our debug menu
-*/
+/**
+ * Base class for defining console command definitions in debug menu settings.
+ * 
+ * This abstract class provides the foundation for creating different types of
+ * debug menu controls that can be configured through Project Settings rather
+ * than requiring code changes.
+ * 
+ * Each derived class represents a specific control type (button, boolean, slider, etc.)
+ * and knows how to register itself with the debug menu system during initialization.
+ * 
+ * The class uses UE's DefaultToInstanced and EditInlineNew meta tags to enable
+ * intuitive editing in the Project Settings interface, allowing developers to
+ * create and configure debug commands directly in the editor.
+ * 
+ * Key Responsibilities:
+ * - Define common properties for all debug menu commands (name, console command)
+ * - Provide registration interface for debug menu integration
+ * - Enable Project Settings configuration through UE's property system
+ * 
+ * Derived classes should override RegisterConsoleCommand() to create appropriate
+ * debug menu controls using the debug menu interface.
+ */
 UCLASS(Abstract, DefaultToInstanced, EditInlineNew)
 class DEBUGMENU_API UDebugMenuConsoleCommandBase : public UObject
 {
 	GENERATED_BODY()
 
 public:
+	/**
+	 * Register this console command definition with the debug menu system.
+	 * Called during debug menu initialization to create the appropriate control.
+	 * 
+	 * @param Category - Debug menu category/tab where this control should appear
+	 * @param DebugMenu - Debug menu instance to register the control with
+	 */
 	virtual void RegisterConsoleCommand(const FName& Category, UImGuiDebugMenu& DebugMenu) {}
 
 protected:
-	UPROPERTY(EditDefaultsOnly, Category=ConsoleCommand)
+	/**
+	 * Display name for this debug menu item.
+	 * This text appears as the label next to the control in the debug menu.
+	 */
+	UPROPERTY(EditDefaultsOnly, Category=ConsoleCommand, meta=(DisplayName="Display Name"))
 	FString CommandName;
 
-	UPROPERTY(EditDefaultsOnly, Category=ConsoleCommand)
+	/**
+	 * Unreal Engine console command to execute when this control is activated.
+	 * Should be a valid UE console command (with or without parameters depending on control type).
+	 * 
+	 * Examples: "god", "fly", "fov 90", "r.ScreenPercentage"
+	 */
+	UPROPERTY(EditDefaultsOnly, Category=ConsoleCommand, meta=(DisplayName="Console Command"))
 	FString ConsoleCommand;
 };
 

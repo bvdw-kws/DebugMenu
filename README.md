@@ -72,9 +72,8 @@ Use the **Get Debug Menu Subsystem** node to access the debug menu system from B
 
 ### Opening the Debug Menu
 
-- **Default key binding**: `F1` (configurable)
-- **Console command**: `showdebugmenu`
-- **Gamepad**: Hold both thumbsticks and press any face button
+- **Default key binding**: `Ctrl + M`
+- **Gamepad**: Press both thumbsticks simultaneously
 
 ## 📖 API Reference
 
@@ -109,13 +108,12 @@ Creates a button that executes a console command without parameters.
 
 ## ⚙️ Configuration
 
-### Input Settings
+### Debug Menu Settings
 
-Configure debug menu controls in **Project Settings > Plugins > Debug Menu**:
+Configure debug menu behavior in **Project Settings > Plugins > Debug Menu**:
 
-- **Toggle Key**: Keyboard shortcut to open/close debug menu
-- **Gamepad Navigation**: Enable controller support for menus
-- **Auto-Save**: Automatically save debug settings when closing menu
+- **Default Category**: Set which tab opens first when debug menu is displayed
+- **Category Commands**: Define predefined debug menu items organized by category tabs
 
 ### Custom Categories
 
@@ -192,7 +190,7 @@ The Debug Menu plugin automatically handles multiple Play-In-Editor instances:
 
 ## 📋 Requirements
 
-- **Unreal Engine**: 5.4 or later
+- **Unreal Engine**: 5.6.1 or later (should work with older versions)
 - **Project Type**: C++ project (Blueprint projects supported with C++ modules)
 - **Build Configuration**: Development or DebugGame (automatically excluded from Shipping)
 
@@ -201,7 +199,7 @@ The Debug Menu plugin automatically handles multiple Play-In-Editor instances:
 ### Debug Menu Won't Open
 - Ensure plugin is enabled in Plugin Browser
 - Check that you're running Development or DebugGame build
-- Verify input binding in Project Settings
+- Try the correct key combination: `Ctrl + M` or press both gamepad thumbsticks
 
 ### Controls Don't Work
 - Confirm console commands are valid and properly spelled
@@ -223,7 +221,3 @@ This plugin is licensed for commercial use. See [LICENSE](LICENSE) file for comp
 ## 🙋‍♂️ Support
 
 For questions, bug reports, or feature requests, please use the support channels provided with this plugin on the Unreal Engine Marketplace.
-
----
-
-*Made with ❤️ for the Unreal Engine developer community*

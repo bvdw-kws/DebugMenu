@@ -27,14 +27,20 @@ void UDebugMenuSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	Super::Initialize(Collection);
 
 #if WITH_DEBUG_MENU
+	// Get debug menu configuration from project settings
 	const UDebugMenuSettings* DebugMenuSettings = GetDefault<UDebugMenuSettings>();
 	
+	// Create the ImGui-based debug menu implementation
 	ImGuiDebugMenu = NewObject<UImGuiDebugMenu>(this);
 	if (ImGuiDebugMenu)
 	{
+		// Initialize ImGui context and register with ImGui module
 		ImGuiDebugMenu->BeginSetting(GetWorld());
+		
+		// Set the initial category tab based on settings
 		ImGuiDebugMenu->SetCategory(DebugMenuSettings->DefaultCategory);
 
+		// Register all predefined console commands from settings
 		for (const auto& CategoryToCommandDefs : DebugMenuSettings->CategoryToCommandsMap)
 		{
 			for (const auto& ConsoleCommandDef : CategoryToCommandDefs.Value.ConsoleCommands)
@@ -44,6 +50,7 @@ void UDebugMenuSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 					continue;
 				}
 
+				// Each console command definition knows how to register itself with the debug menu
 				ConsoleCommandDef->RegisterConsoleCommand(CategoryToCommandDefs.Key, *ImGuiDebugMenu);
 			}
 		}
@@ -56,6 +63,7 @@ void UDebugMenuSubsystem::Deinitialize()
 	Super::Deinitialize();
 
 #if WITH_DEBUG_MENU
+	// Clean up ImGui context and unregister from ImGui module
 	if (ImGuiDebugMenu)
 	{
 		ImGuiDebugMenu->EndSetting(GetWorld());
@@ -70,17 +78,22 @@ void UDebugMenuSubsystem::Tick(float DeltaTime)
 
 	if (ImGuiDebugMenu)
 	{
+		// Process input from the first player controller (player index 0)
+		// In multiplayer scenarios, this could be extended to support multiple controllers
 		APlayerController* PlayerOneController = UGameplayStatics::GetPlayerController(this, 0);
 		if (IsValid(PlayerOneController))
 		{
+			// Check for debug menu toggle input (Ctrl+M or gamepad combination)
 			if (CheckToggleDebugMenu(PlayerOneController))
 			{
 				bool bOpen = !ImGuiDebugMenu->IsOpenDebugMenu();
 				ImGuiDebugMenu->SetOpenDebugMenu(bOpen);
 
+				// Broadcast the toggle event for other systems to react to
 				OnToggleDebugMenu.Broadcast(bOpen);
 			}
 
+			// Allow page/category navigation when menu is open
 			if (IsMenuOpened())
 			{
 				CheckChangePage(PlayerOneController);
@@ -151,11 +164,13 @@ bool UDebugMenuSubsystem::CheckChangePage(APlayerController* PlayerController)
 
 	if (ImGuiDebugMenu)
 	{
+		// Left shoulder button - navigate to previous debug category/tab
 		if (PlayerController->WasInputKeyJustPressed(EKeys::Gamepad_LeftShoulder))
 		{
 			ImGuiDebugMenu->ChangePage(false);
 			return true;
 		}
+		// Right shoulder button - navigate to next debug category/tab
 		else if (PlayerController->WasInputKeyJustPressed(EKeys::Gamepad_RightShoulder))
 		{
 			ImGuiDebugMenu->ChangePage(true);
@@ -170,7 +185,8 @@ bool UDebugMenuSubsystem::CheckToggleDebugMenu(APlayerController* PlayerControll
 {
 	check(PlayerController != nullptr);
 
-	// Keyboard
+	// === KEYBOARD INPUT: Ctrl + M ===
+	// Track left control key state for combination input
 	if (PlayerController->WasInputKeyJustPressed(EKeys::LeftControl))
 	{
 		bIsPressDebugMenuTriggerKey = true;
@@ -181,6 +197,7 @@ bool UDebugMenuSubsystem::CheckToggleDebugMenu(APlayerController* PlayerControll
 		bIsPressDebugMenuTriggerKey = false;
 	}
 
+	// If control is held, check for 'M' key press
 	if (bIsPressDebugMenuTriggerKey)
 	{
 		if (PlayerController->WasInputKeyJustPressed(EKeys::M))
@@ -189,7 +206,8 @@ bool UDebugMenuSubsystem::CheckToggleDebugMenu(APlayerController* PlayerControll
 		}
 	}
 
-	// Gamepad
+	// === GAMEPAD INPUT: Both Thumbsticks Pressed ===
+	// Track left thumbstick click state
 	if (PlayerController->WasInputKeyJustPressed(EKeys::Gamepad_LeftThumbstick))
 	{
 		bIsHoldGamepadLeftThumbstick = true;
@@ -200,6 +218,7 @@ bool UDebugMenuSubsystem::CheckToggleDebugMenu(APlayerController* PlayerControll
 		bIsHoldGamepadLeftThumbstick = false;
 	}
 
+	// Track right thumbstick click state
 	if (PlayerController->WasInputKeyJustPressed(EKeys::Gamepad_RightThumbstick))
 	{
 		bIsHoldGamepadRightThumbstick = true;
@@ -210,11 +229,12 @@ bool UDebugMenuSubsystem::CheckToggleDebugMenu(APlayerController* PlayerControll
 		bIsHoldGamepadRightThumbstick = false;
 	}
 
+	// Check if either input combination was triggered
 	if (bIsPressDebugMenuShowKey ||
 		(bIsHoldGamepadLeftThumbstick && bIsHoldGamepadRightThumbstick))
 	{
+		// Reset all input states after successful trigger
 		bIsPressDebugMenuShowKey = false;
-
 		bIsHoldGamepadLeftThumbstick = false;
 		bIsHoldGamepadRightThumbstick = false;
 
