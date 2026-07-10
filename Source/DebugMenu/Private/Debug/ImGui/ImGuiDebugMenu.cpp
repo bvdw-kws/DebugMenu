@@ -1,4 +1,4 @@
-// Copyright (C) 2024 Van de Walle Bastien
+﻿// Copyright (C) 2024 Van de Walle Bastien
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -257,7 +257,7 @@ void UImGuiDebugMenu::DrawImGui(bool& bOutIsOpenDebugMenu)
 
 	ANSICHAR SearchBuff[256];
 	SearchBuff[0] = '\0';
-	FCStringAnsi::Strcpy(SearchBuff, StringCast<ANSICHAR>(*MySearch).Get());
+	FCStringAnsi::Strncpy(SearchBuff, StringCast<ANSICHAR>(*MySearch).Get(), UE_ARRAY_COUNT(SearchBuff));
 
 	if (ImGui::InputText(StringCast<ANSICHAR>(*SearchLabel).Get(), SearchBuff, sizeof(SearchBuff)))
 	{
