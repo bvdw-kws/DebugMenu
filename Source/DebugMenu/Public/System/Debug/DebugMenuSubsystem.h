@@ -64,7 +64,13 @@ public:
 	 * @return True if menu is open and accepting input
 	 */
 	bool IsMenuOpened() const;
-	
+
+	/**
+	 * Check if the debug menu is currently blocking player control input.
+	 * @return True if player control should be blocked
+	 */
+	bool ShouldBlockPlayerControl() const;
+
 	/**
 	 * Reset the debug menu window to its default size and position.
 	 * Useful for fixing display issues or resetting after resolution changes.

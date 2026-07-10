@@ -19,8 +19,8 @@
 // Starting from version 4.18, we have support for dual key bindings.
 #define ENGINE_COMPATIBILITY_SINGLE_KEY_BINDING         BELOW_ENGINE_VERSION(4, 18)
 
-// Starting from version 4.18, FSoftClassPath is replaced by FSoftClassPath. The new header contains a typedef
-// that renames FSoftClassPath to FSoftClassPath, so it is still possible tu use the old type name in code.
+// Starting from version 4.18, FStringClassReference is replaced by FSoftClassPath. The new header contains a typedef
+// that renames FStringClassReference to FSoftClassPath, so it is still possible tu use the old type name in code.
 // The old header forwards to the new one but if used it outputs a warning, so we want to avoid it.
 #define ENGINE_COMPATIBILITY_LEGACY_STRING_CLASS_REF    BELOW_ENGINE_VERSION(4, 18)
 
@@ -33,3 +33,8 @@
 
 // Starting from version 4.26, FKey::IsFloatAxis and FKey::IsVectorAxis are deprecated and replaced with FKey::IsAxis[1|2|3]D methods.
 #define ENGINE_COMPATIBILITY_LEGACY_KEY_AXIS_API        BELOW_ENGINE_VERSION(4, 26)
+
+#define ENGINE_COMPATIBILITY_LEGACY_VECTOR2F            BELOW_ENGINE_VERSION(5, 0)
+
+// Starting from version 5.4, bAllowShrinking is deprecated in favour of EAllowShrinking enum.
+#define ENGINE_COMPATIBILITY_LEGACY_CONTAINER_SHRINKING	BELOW_ENGINE_VERSION(5, 4)

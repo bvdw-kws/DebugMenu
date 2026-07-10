@@ -30,6 +30,8 @@ public:
 	void SetOpenDebugMenu(bool bInIsOpenDebugMenu);
 	bool IsOpenDebugMenu() const { return bIsOpenDebugMenu; }
 
+	bool ShouldBlockPlayerControl() const { return bShouldBlockPlayerControl; }
+
 	void ResetWindow();
 
 	void SaveDebug(TArray<uint8>& OutMemory) const;
@@ -57,6 +59,8 @@ protected:
 private:
 	UPROPERTY(Transient)
 	bool bIsOpenDebugMenu{ false };
+	UPROPERTY(Transient)
+	bool bShouldBlockPlayerControl{ true };
 	UPROPERTY(Transient)
 	TArray<FImGuiDebugMenuCategoryItem> DebugCategories;
 

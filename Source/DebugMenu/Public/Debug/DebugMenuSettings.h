@@ -7,7 +7,7 @@
 #pragma once
 
 #include "Engine/DeveloperSettingsBackedByCVars.h"
-#include "Debug/DebugMenuConsoleCommandTypes.h"
+#include "UObject/SoftObjectPtr.h"
 
 #include "DebugMenuSettings.generated.h"
 

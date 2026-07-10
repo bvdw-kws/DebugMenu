@@ -8,6 +8,7 @@
 
 #include <Modules/ModuleManager.h>
 
+class UTexture;
 
 class FImGuiModule : public IModuleInterface
 {
@@ -58,6 +59,16 @@ public:
 	virtual FImGuiDelegateHandle AddWorldImGuiDelegate(const FImGuiDelegate& Delegate);
 
 	/**
+	 * Add a delegate called at the end of a specific world's debug frame to draw debug controls in its ImGui context,
+	 * creating that context on demand.
+	 *
+	 * @param World - A specific world to add the delegate to to
+	 * @param Delegate - Delegate that we want to add (@see FImGuiDelegate::Create...)
+	 * @returns Returns handle that can be used to remove delegate (@see RemoveImGuiDelegate)
+	 */
+	virtual FImGuiDelegateHandle AddWorldImGuiDelegate(const UWorld* World, const FImGuiDelegate& Delegate);
+
+	/**
 	 * Add shared delegate called for each ImGui context at the end of debug frame, after calling context specific
 	 * delegate. This delegate will be used for any ImGui context, created before or after it is registered.
 	 *
@@ -84,6 +95,22 @@ public:
 	virtual FImGuiTextureHandle FindTextureHandle(const FName& Name);
 
 	/**
+	 * If it exists, get a texture object with given resource name.
+	 *
+	 * @param Name - Resource name of a texture to find
+	 * @returns The texture object, or nullptr if not found
+	 */
+	virtual UTexture* FindTexture(const FName& Name);
+
+	/**
+	 * If it exists, get a texture object with given texture handle.
+	 *
+	 * @param Name - Resource name of a texture to find
+	 * @returns The texture object, or nullptr if not found
+	 */
+	virtual UTexture* FindTexture(const FImGuiTextureHandle& Handle);
+
+	/**
 	 * Register texture and create its Slate resources. If texture with that name already exists then it may be updated
 	 * or if bMakeUnique is true, exception will be thrown. Throws exception, if name argument is NAME_None or texture
 	 * is null.
@@ -98,7 +125,7 @@ public:
 	 * @returns Handle to the texture resources, which can be used to release allocated resources and as an argument to
 	 *     relevant ImGui functions
 	 */
-	virtual FImGuiTextureHandle RegisterTexture(const FName& Name, class UTexture2D* Texture, bool bMakeUnique = false);
+	virtual FImGuiTextureHandle RegisterTexture(const FName& Name, class UTexture* Texture, bool bMakeUnique = false);
 
 	/**
 	 * Unregister texture and release its Slate resources. If handle is null or not valid, this function fails silently
@@ -107,6 +134,8 @@ public:
 	 * @returns ImGui Texture Handle to texture that needs to be unregistered
 	 */
 	virtual void ReleaseTexture(const FImGuiTextureHandle& Handle);
+
+	virtual void RebuildFontAtlas();
 
 	/**
 	 * Get ImGui module properties.
@@ -165,7 +194,6 @@ public:
 	virtual void ShutdownModule() override;
 
 private:
-
 #if WITH_EDITOR
 	virtual void SetProperties(const FImGuiModuleProperties& Properties);
 	struct FImGuiContextHandle* ImGuiContextHandle = nullptr;

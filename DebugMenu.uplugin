@@ -22,8 +22,9 @@
 		},
 		{
 			"Name": "ImGui",
-			"Type": "DeveloperTool",
-			"LoadingPhase": "PreDefault"
+			"Type": "Runtime",
+			"LoadingPhase": "PreDefault",
+			"PlatformAllowList": ["Win64"]
 		}
 	],
 	"Plugins": []

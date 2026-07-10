@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnrealBuildTool;
 
+[SupportedPlatforms(["Win64"])]
 public class ImGui : ModuleRules
 {
 #if WITH_FORWARDED_MODULE_RULES_CTOR
@@ -12,7 +13,6 @@ public class ImGui : ModuleRules
 	public ImGui(TargetInfo Target)
 #endif
 	{
-
 #if WITH_FORWARDED_MODULE_RULES_CTOR
 		bool bBuildEditor = Target.bBuildEditor;
 #else
@@ -27,16 +27,18 @@ public class ImGui : ModuleRules
 
 #if UE_4_24_OR_LATER
 		bLegacyPublicIncludePaths = false;
-		//@ BASTIEN ADD
-		// ShadowVariableWarningLevel = WarningLevel.Error;
-		CppCompileWarningSettings.UnsafeTypeCastWarningLevel = WarningLevel.Off;
-		//@ BASTIEN END
 		bTreatAsEngineModule = true;
+#if UE_5_6_OR_LATER
+		CppCompileWarningSettings.ShadowVariableWarningLevel = WarningLevel.Error;
+#else
+		ShadowVariableWarningLevel = WarningLevel.Error;
+#endif
 #endif
 
 		PublicIncludePaths.AddRange(
 			new string[] {
-				Path.Combine(ModuleDirectory, "../ThirdParty/ImGuiLibrary/Include")
+				Path.Combine(ModuleDirectory, "../ThirdParty/ImGuiLibrary/Include"),
+				Path.Combine(ModuleDirectory, "../ThirdParty/ImPlotLibrary/Public"),
 				// ... add public include paths required here ...
 			}
 			);
@@ -45,7 +47,8 @@ public class ImGui : ModuleRules
 		PrivateIncludePaths.AddRange(
 			new string[] {
 				"ImGui/Private",
-				"ThirdParty/ImGuiLibrary/Private"
+				"ThirdParty/ImGuiLibrary/Private",
+				"ThirdParty/ImPlotLibrary/Private",
 				// ... add other private include paths required here ...
 			}
 			);
@@ -69,7 +72,7 @@ public class ImGui : ModuleRules
 				"InputCore",
 				"Slate",
 				"SlateCore"
-				// ... add private dependencies that you statically link with here ...	
+				// ... add private dependencies that you statically link with here ...
 			}
 			);
 
@@ -100,5 +103,8 @@ public class ImGui : ModuleRules
 #endif
 
 		PrivateDefinitions.Add(string.Format("RUNTIME_LOADER_ENABLED={0}", bEnableRuntimeLoader ? 1 : 0));
+
+		// Force ImPlot to export its methods in this module DLL so we can import them in our main project
+		PrivateDefinitions.Add("IMPLOT_API=DLLEXPORT");
 	}
 }

@@ -8,6 +8,9 @@
 #include "Utilities/Arrays.h"
 #include "VersionCompatibility.h"
 
+// Include ImPlot here so we can call `ImPlot::CreateContext`
+#include <implot.h>
+
 #include <GenericPlatform/GenericPlatformFile.h>
 #include <Misc/Paths.h>
 
@@ -76,29 +79,33 @@ namespace
 FImGuiContextProxy::FImGuiContextProxy(const FString& InName, int32 InContextIndex, ImFontAtlas* InFontAtlas, float InDPIScale)
 	: Name(InName)
 	, ContextIndex(InContextIndex)
-	, IniFilename(StringCast<ANSICHAR>(*GetIniFile(InName)).Get())
+	, IniFilename(TCHAR_TO_ANSI(*GetIniFile(InName)))
 {
 	// Create context.
 	Context = ImGui::CreateContext(InFontAtlas);
+
+	// Create ImPlot context
+	ImPlot::CreateContext();
 
 	// Set this context in ImGui for initialization (any allocations will be tracked in this context).
 	SetAsCurrent();
 
 	// Start initialization.
 	ImGuiIO& IO = ImGui::GetIO();
+	InputState.IOFunctions = IO;
 
 	// Set session data storage.
 	IO.IniFilename = IniFilename.c_str();
 
 	// Start with the default canvas size.
 	ResetDisplaySize();
-	IO.DisplaySize = ImVec2(DisplaySize.X, DisplaySize.Y);
+	IO.DisplaySize = {(float)DisplaySize.X, (float)DisplaySize.Y};
 
 	// Set the initial DPI scale.
 	SetDPIScale(InDPIScale);
 
 	// Initialize key mapping, so context can correctly interpret input state.
-	ImGuiInterops::SetUnrealKeyMap(IO);
+	ImGuiInterops::SetUnrealKeyMap();
 
 	// Begin frame to complete context initialization (this is to avoid problems with other systems calling to ImGui
 	// during startup).
@@ -113,8 +120,14 @@ FImGuiContextProxy::~FImGuiContextProxy()
 		// version), even though we can pass it to the destroy function.
 		SetAsCurrent();
 
+		// Ensure frame has ended
+		EndFrame();
+
 		// Save context data and destroy.
 		ImGui::DestroyContext(Context);
+
+		// Destroy ImPlot context
+		ImPlot::DestroyContext();
 	}
 }
 
@@ -188,16 +201,23 @@ void FImGuiContextProxy::Tick(float DeltaSeconds)
 			EndFrame();
 		}
 
+		ImGuiIO& IO = ImGui::GetIO();
+
 		// Update context information (some data need to be collected before starting a new frame while some other data
 		// may need to be collected after).
 		bHasActiveItem = ImGui::IsAnyItemActive();
 		MouseCursor = ImGuiInterops::ToSlateMouseCursor(ImGui::GetMouseCursor());
 
+		// Update remaining context information.
+		bWantsMouseCapture = IO.WantCaptureMouse;
+
+		// Set Config and Backend flags in this IO context, as InputState IO is only for function use
+		ImGuiInterops::SetFlag(IO.ConfigFlags, ImGuiConfigFlags_NavEnableKeyboard, InputState.IsKeyboardNavigationEnabled());
+		ImGuiInterops::SetFlag(IO.ConfigFlags, ImGuiConfigFlags_NavEnableGamepad, InputState.IsGamepadNavigationEnabled());
+		ImGuiInterops::SetFlag(IO.BackendFlags, ImGuiBackendFlags_HasGamepad, InputState.HasGamepad());
+
 		// Begin a new frame and set the context back to a state in which it allows to draw controls.
 		BeginFrame(DeltaSeconds);
-
-		// Update remaining context information.
-		bWantsMouseCapture = ImGui::GetIO().WantCaptureMouse;
 	}
 }
 
@@ -208,10 +228,9 @@ void FImGuiContextProxy::BeginFrame(float DeltaTime)
 		ImGuiIO& IO = ImGui::GetIO();
 		IO.DeltaTime = DeltaTime;
 
-		ImGuiInterops::CopyInput(IO, InputState);
 		InputState.ClearUpdateState();
 
-		IO.DisplaySize = ImVec2(DisplaySize.X, DisplaySize.Y);
+		IO.DisplaySize = { (float)DisplaySize.X, (float)DisplaySize.Y };
 
 		ImGui::NewFrame();
 
@@ -240,7 +259,11 @@ void FImGuiContextProxy::UpdateDrawData(ImDrawData* DrawData)
 {
 	if (DrawData && DrawData->CmdListsCount > 0)
 	{
+#if ENGINE_COMPATIBILITY_LEGACY_CONTAINER_SHRINKING
+		DrawLists.SetNum(DrawData->CmdListsCount, false);
+#else
 		DrawLists.SetNum(DrawData->CmdListsCount, EAllowShrinking::No);
+#endif // ENGINE_COMPATIBILITY_LEGACY_CONTAINER_SHRINKING
 
 		for (int Index = 0; Index < DrawData->CmdListsCount; Index++)
 		{

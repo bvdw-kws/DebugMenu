@@ -7,7 +7,11 @@
 
 #include "Debug/DebugMenuSettings.h"
 
+#include "UObject/ConstructorHelpers.h"
+
 UDebugMenuSettings::UDebugMenuSettings(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	static ConstructorHelpers::FObjectFinder<UDebugMenuPreset> DebugMenuPresetAsset(TEXT("/DebugMenu/DataAsset/DA_DebugMenu_Preset_Stat"));
+	DefaultDebugPreset = DebugMenuPresetAsset.Object;
 }

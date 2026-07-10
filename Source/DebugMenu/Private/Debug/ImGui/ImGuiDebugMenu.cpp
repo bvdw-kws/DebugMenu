@@ -39,6 +39,7 @@ void UImGuiDebugMenu::EndSetting(UWorld* World)
 	FImGuiModule::Get().GetProperties().SetKeyboardNavigationEnabled(false);
 	FImGuiModule::Get().GetProperties().SetGamepadNavigationEnabled(false);
 	FImGuiModule::Get().GetProperties().SetGamepadInputShared(false);
+	FImGuiModule::Get().GetProperties().SetKeyboardInputShared(false);
 
 	if (World != nullptr)
 	{
@@ -65,7 +66,7 @@ void UImGuiDebugMenu::ResetWindow()
 {
 #if WITH_IMGUI
 	WindowPos = ImVec2(60.0f, 60.0f);
-	WindowSize = ImVec2(400.0f, 400.0f);
+	WindowSize = ImVec2(600.0f, 400.0f);
 	bResetWindow = true;
 #endif // WITH_IMGUI
 }
@@ -82,6 +83,7 @@ void UImGuiDebugMenu::SetOpenDebugMenu(bool bInIsOpenDebugMenu)
 		FImGuiModule::Get().GetProperties().SetGamepadNavigationEnabled(bIsOpenDebugMenu);
 
 		FImGuiModule::Get().GetProperties().SetGamepadInputShared(bIsOpenDebugMenu);
+		FImGuiModule::Get().GetProperties().SetKeyboardInputShared(bIsOpenDebugMenu);
 #endif // WITH_IMGUI
 	}
 }
@@ -154,6 +156,9 @@ void UImGuiDebugMenu::DrawImGui(bool& bOutIsOpenDebugMenu)
 	ImGui::SetNextWindowSize(WindowSize, WindowCond);
 	ImGui::Begin("Debug Menu", &bOutIsOpenDebugMenu);
 
+	ImGui::Checkbox("Block player input during debug menu", &bShouldBlockPlayerControl);
+	ImGui::NewLine();
+
 	// Header
 	const float WindowWidth = ImGui::GetWindowWidth();
 	const float ButtonWidth = WindowWidth * (1.0f / 5.0f);
@@ -198,7 +203,7 @@ void UImGuiDebugMenu::DrawImGui(bool& bOutIsOpenDebugMenu)
 	ImGui::Columns();
 
 	// Page
-	if (ImGui::CollapsingHeader("Pages"))
+	if (ImGui::CollapsingHeader("Pages", ImGuiTreeNodeFlags_DefaultOpen))
 	{
 		float LineWidth = 0.0f;
 		float TextMargin = 50.0f;

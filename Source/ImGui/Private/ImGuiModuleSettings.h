@@ -69,7 +69,7 @@ enum class EImGuiCanvasSizeType : uint8
 };
 
 /**
- * Struct with information how to calculate canvas size. 
+ * Struct with information how to calculate canvas size.
  */
 USTRUCT()
 struct FImGuiCanvasSizeInfo
@@ -202,6 +202,14 @@ protected:
 	UPROPERTY(EditAnywhere, config, Category = "Input", AdvancedDisplay)
 	bool bUseSoftwareCursor = false;
 
+	// The input processor priority when registering.
+	// This is used to fix an issue where the CommonAnalogCursor preprocessor would consume "accept" button presses on controller.
+	// An earlier priority means it will receive input earlier and other processors won't be able to block it from receiving
+	// events. A later priority means it won't block other processors when inputs are pressed. The priority needs to have a value
+	// that balances between these 2 scenarios. -1 means the input processor will be added to the end of the input processor list.
+	UPROPERTY(EditAnywhere, config, Category = "Input", AdvancedDisplay)
+	int32 InputProcessorPriority = 2;
+
 	// Define a shortcut key to 'ImGui.ToggleInput' command. Binding is only set if the key field is valid.
 	// Note that modifier key properties can be set to one of the three values: undetermined means that state of the given
 	// modifier is not important, checked means that it needs to be pressed and unchecked means that it cannot be pressed.
@@ -236,7 +244,7 @@ public:
 
 	// Generic delegate used to notify changes of boolean properties.
 	DECLARE_MULTICAST_DELEGATE_OneParam(FBoolChangeDelegate, bool);
-	DECLARE_MULTICAST_DELEGATE_OneParam(FSoftClassPathChangeDelegate, const FSoftClassPath&);
+	DECLARE_MULTICAST_DELEGATE_OneParam(FStringClassReferenceChangeDelegate, const FSoftClassPath&);
 	DECLARE_MULTICAST_DELEGATE_OneParam(FImGuiCanvasSizeInfoChangeDelegate, const FImGuiCanvasSizeInfo&);
 	DECLARE_MULTICAST_DELEGATE_OneParam(FImGuiDPIScaleInfoChangeDelegate, const FImGuiDPIScaleInfo&);
 
@@ -258,6 +266,8 @@ public:
 	// Get the software cursor configuration.
 	bool UseSoftwareCursor() const { return bUseSoftwareCursor; }
 
+	int32 GetInputProcessorPriority() const { return InputProcessorPriority; }
+
 	// Get the shortcut configuration for 'ImGui.ToggleInput' command.
 	const FImGuiKeyInfo& GetToggleInputKey() const { return ToggleInputKey; }
 
@@ -268,7 +278,7 @@ public:
 	const FImGuiDPIScaleInfo& GetDPIScaleInfo() const { return DPIScale; }
 
 	// Delegate raised when ImGui Input Handle is changed.
-	FSoftClassPathChangeDelegate OnImGuiInputHandlerClassChanged;
+	FStringClassReferenceChangeDelegate OnImGuiInputHandlerClassChanged;
 
 	// Delegate raised when software cursor configuration is changed.
 	FBoolChangeDelegate OnUseSoftwareCursorChanged;
@@ -290,6 +300,7 @@ private:
 	void SetShareGamepadInput(bool bShare);
 	void SetShareMouseInput(bool bShare);
 	void SetUseSoftwareCursor(bool bUse);
+	void SetInputProcessorPriority(int32 Priority);
 	void SetToggleInputKey(const FImGuiKeyInfo& KeyInfo);
 	void SetCanvasSizeInfo(const FImGuiCanvasSizeInfo& CanvasSizeInfo);
 	void SetDPIScaleInfo(const FImGuiDPIScaleInfo& ScaleInfo);
@@ -309,4 +320,5 @@ private:
 	bool bShareGamepadInput = false;
 	bool bShareMouseInput = false;
 	bool bUseSoftwareCursor = false;
+	int32 InputProcessorPriority = 2;
 };

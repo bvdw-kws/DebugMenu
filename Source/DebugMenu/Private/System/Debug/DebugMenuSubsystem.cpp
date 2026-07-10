@@ -154,6 +154,18 @@ bool UDebugMenuSubsystem::IsMenuOpened() const
 	return false;
 }
 
+bool UDebugMenuSubsystem::ShouldBlockPlayerControl() const
+{
+#if WITH_DEBUG_MENU
+	if (ImGuiDebugMenu)
+	{
+		return ImGuiDebugMenu->ShouldBlockPlayerControl();
+	}
+#endif // WITH_DEBUG_MENU
+
+	return false;
+}
+
 void UDebugMenuSubsystem::ResetDebugWindow()
 {
 #if WITH_DEBUG_MENU

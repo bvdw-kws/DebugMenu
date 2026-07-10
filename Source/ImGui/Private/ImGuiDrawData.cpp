@@ -10,7 +10,11 @@ void FImGuiDrawList::CopyVertexData(TArray<FSlateVertex>& OutVertexBuffer, const
 #endif // ENGINE_COMPATIBILITY_LEGACY_CLIPPING_API
 {
 	// Reset and reserve space in destination buffer.
+#if ENGINE_COMPATIBILITY_LEGACY_CONTAINER_SHRINKING
+	OutVertexBuffer.SetNumUninitialized(ImGuiVertexBuffer.Size, false);
+#else
 	OutVertexBuffer.SetNumUninitialized(ImGuiVertexBuffer.Size, EAllowShrinking::No);
+#endif // ENGINE_COMPATIBILITY_LEGACY_CONTAINER_SHRINKING
 
 	// Transform and copy vertex data.
 	for (int Idx = 0; Idx < ImGuiVertexBuffer.Size; Idx++)
@@ -29,7 +33,11 @@ void FImGuiDrawList::CopyVertexData(TArray<FSlateVertex>& OutVertexBuffer, const
 		SlateVertex.Position[1] = VertexPosition.Y;
 		SlateVertex.ClipRect = VertexClippingRect;
 #else
-		SlateVertex.Position = FVector2f(Transform.TransformPoint(ImGuiInterops::ToVector2D(ImGuiVertex.pos)));
+#if ENGINE_COMPATIBILITY_LEGACY_VECTOR2F
+		SlateVertex.Position = Transform.TransformPoint(ImGuiInterops::ToVector2D(ImGuiVertex.pos));
+#else
+		SlateVertex.Position = (FVector2f)Transform.TransformPoint(ImGuiInterops::ToVector2D(ImGuiVertex.pos));
+#endif // ENGINE_COMPATIBILITY_LEGACY_VECTOR2F
 #endif // ENGINE_COMPATIBILITY_LEGACY_CLIPPING_API
 
 		// Unpack ImU32 color.
@@ -40,7 +48,11 @@ void FImGuiDrawList::CopyVertexData(TArray<FSlateVertex>& OutVertexBuffer, const
 void FImGuiDrawList::CopyIndexData(TArray<SlateIndex>& OutIndexBuffer, const int32 StartIndex, const int32 NumElements) const
 {
 	// Reset buffer.
+#if ENGINE_COMPATIBILITY_LEGACY_CONTAINER_SHRINKING
+	OutIndexBuffer.SetNumUninitialized(NumElements, false);
+#else
 	OutIndexBuffer.SetNumUninitialized(NumElements, EAllowShrinking::No);
+#endif // ENGINE_COMPATIBILITY_LEGACY_CONTAINER_SHRINKING
 
 	// Copy elements (slow copy because of different sizes of ImDrawIdx and SlateIndex and because SlateIndex can
 	// have different size on different platforms).
@@ -56,8 +68,4 @@ void FImGuiDrawList::TransferDrawData(ImDrawList& Src)
 	Src.CmdBuffer.swap(ImGuiCommandBuffer);
 	Src.IdxBuffer.swap(ImGuiIndexBuffer);
 	Src.VtxBuffer.swap(ImGuiVertexBuffer);
-
-	// ImGui seems to clear draw lists in every frame, but since source list can contain pointers to buffers that
-	// we just swapped, it is better to clear explicitly here.
-	Src.Clear();
 }

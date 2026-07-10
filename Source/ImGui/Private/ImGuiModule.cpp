@@ -53,6 +53,12 @@ FImGuiDelegateHandle FImGuiModule::AddWorldImGuiDelegate(const FImGuiDelegate& D
 	return { FImGuiDelegatesContainer::Get().OnWorldDebug(ContextIndex).Add(Delegate), EDelegateCategory::Default, ContextIndex };
 }
 
+FImGuiDelegateHandle FImGuiModule::AddWorldImGuiDelegate(const UWorld* World, const FImGuiDelegate& Delegate)
+{
+	const int32 ContextIndex = Utilities::GetWorldContextIndex(World);
+	return { FImGuiDelegatesContainer::Get().OnWorldDebug(ContextIndex).Add(Delegate), EDelegateCategory::Default, ContextIndex };
+}
+
 FImGuiDelegateHandle FImGuiModule::AddMultiContextImGuiDelegate(const FImGuiDelegate& Delegate)
 {
 	return { FImGuiDelegatesContainer::Get().OnMultiContextDebug().Add(Delegate), EDelegateCategory::MultiContext };
@@ -78,7 +84,19 @@ FImGuiTextureHandle FImGuiModule::FindTextureHandle(const FName& Name)
 	return (Index != INDEX_NONE) ? FImGuiTextureHandle{ Name, ImGuiInterops::ToImTextureID(Index) } : FImGuiTextureHandle{};
 }
 
-FImGuiTextureHandle FImGuiModule::RegisterTexture(const FName& Name, class UTexture2D* Texture, bool bMakeUnique)
+UTexture* FImGuiModule::FindTexture(const FName& Name)
+{
+	const TextureIndex Index = ImGuiModuleManager->GetTextureManager().FindTextureIndex(Name);
+	return (Index != INDEX_NONE) ? ImGuiModuleManager->GetTextureManager().GetTextureObject(Index) : nullptr;
+}
+
+UTexture* FImGuiModule::FindTexture(const FImGuiTextureHandle& Handle)
+{
+	const TextureIndex Index = ImGuiInterops::ToTextureIndex(Handle.GetTextureId());
+	return (Index != INDEX_NONE) ? ImGuiModuleManager->GetTextureManager().GetTextureObject(Index) : nullptr;
+}
+
+FImGuiTextureHandle FImGuiModule::RegisterTexture(const FName& Name, class UTexture* Texture, bool bMakeUnique)
 {
 	FTextureManager& TextureManager = ImGuiModuleManager->GetTextureManager();
 
@@ -95,6 +113,14 @@ void FImGuiModule::ReleaseTexture(const FImGuiTextureHandle& Handle)
 	if (Handle.IsValid())
 	{
 		ImGuiModuleManager->GetTextureManager().ReleaseTextureResources(ImGuiInterops::ToTextureIndex(Handle.GetTextureId()));
+	}
+}
+
+void FImGuiModule::RebuildFontAtlas()
+{
+	if (ImGuiModuleManager)
+	{
+		ImGuiModuleManager->RebuildFontAtlas();
 	}
 }
 
