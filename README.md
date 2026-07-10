@@ -1,6 +1,6 @@
 # Debug Menu Plugin for Unreal Engine
 
-[![License](https://img.shields.io/badge/license-Commercial-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](LICENSE)
 [![Engine](https://img.shields.io/badge/Unreal%20Engine-5.4%2B-orange.svg)](https://www.unrealengine.com)
 [![ImGui](https://img.shields.io/badge/ImGui-1.74-green.svg)](https://github.com/ocornut/imgui)
 
